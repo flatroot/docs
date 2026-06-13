@@ -1,0 +1,38 @@
+name: Publish docs
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      BUILDKIT_PROGRESS: plain
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone flatroot
+        run: git clone https://github.com/flatroot/flatroot
+
+      - name: Build docs image
+        run: |
+          docker build \
+            -f flatroot/docker/Dockerfile.mkdocs \
+            -t flatroot-mkdocs \
+            flatroot
+
+      - name: Build all versions
+        run: |
+          docker run --rm \
+            -v "$PWD/flatroot:/flatroot-src" \
+            -v "$PWD:/docs" \
+            flatroot-mkdocs sh /docs/publish.sh
+
+      - name: Push gh-pages
+        run: git push --force origin gh-pages
