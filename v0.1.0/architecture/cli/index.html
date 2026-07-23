@@ -1,0 +1,3901 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Build Linux root filesystem directories from official distribution packages — without root privileges or a running package manager.">
+      
+      
+      
+        <link rel="canonical" href="https://flatroot.github.io/docs/v0.1.0/architecture/cli/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../packages/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>CLI Design - FlatRoot</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/panzoom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <style>.md-typeset .md-tag.md-tag--matched{background-color:var(--md-accent-fg-color,#448aff);color:#fff}</style><meta name="panzoom-theme" content="material">
+<meta name="panzoom-data" content='{"selectors": [".mermaid", ".d2", ".drawio"], "initial_zoom_level": 1.0}'> </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cli-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="FlatRoot" class="md-header__button md-logo" aria-label="FlatRoot" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FlatRoot
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/flatroot/flatroot" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="FlatRoot" class="md-nav__button md-logo" aria-label="FlatRoot" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    FlatRoot
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/flatroot/flatroot" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/first-rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Build your first rootfs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/reproducible-builds/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reproducible Builds
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/get-flatroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get FlatRoot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/install-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/query-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/pinning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to/multiarch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multiple Architectures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/environment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cache/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/path_index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Path Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/metadata/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rootfs Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7" id="__nav_4_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Package Formats
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Package Formats
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/package-formats/deb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    deb
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/package-formats/rpm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    rpm
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/package-formats/pacman/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pacman
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/package-formats/apk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    apk
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-distro-abstraction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The distro abstraction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-seed-list/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The seed list
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/dependency-resolution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependency resolution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/virtual-names-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Virtual names and providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/conditional-dependencies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Conditional dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-sandbox/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The sandbox
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/cache-regeneration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cache regeneration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/the-metadata-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The metadata layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/cross-distro-boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cross-distro boundaries
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../explanation/multiarch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multiarch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Design
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Global options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selecting-the-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting the Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-the-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting the Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Attempts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing Packages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exporting-a-rootfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exporting a Rootfs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching Packages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#querying-the-package-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Querying the Package Index
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#listing-supported-distributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing Supported Distributions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#listing-available-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing Available Releases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Spec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installing Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Searching Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/query/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying the Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/remotes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Listing Distributions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/releases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Listing Releases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/export/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Exporting a Rootfs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spec/trace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tracing Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_1" id="__nav_7_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    System
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/system/rootfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rootfs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/system/chroot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    chroot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/system/bubblewrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    bubblewrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/system/ldconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ldconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/system/soname/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shared-library sonames
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Packages
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Packages
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/packages/virtual/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Virtual Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/packages/contents-indices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contents Indices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/packages/sbom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SBOM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Dependencies
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/dependencies/alternatives/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alternatives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/dependencies/rich/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rich Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/dependencies/install-if/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install-If Triggers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/dependencies/bfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BFS Traversal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/dependencies/ast/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rich-Dep AST
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Versioning
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/versioning/glibc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    glibc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/versioning/snapshot-pinning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Snapshot Pinning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/versioning/version-comparison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Version Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Post-Install
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Post-Install
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/postinstall/stubs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stub Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/postinstall/base-packages/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Base Packages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Formats
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Formats
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/formats/ar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ar (deb archive)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/formats/cpio/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cpio (rpm payload)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/formats/rfc822/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RFC822 records
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/formats/oci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OCI image
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/formats/dwarfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DwarFS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/formats/squashfs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SquashFS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global options
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Global options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selecting-the-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting the Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-the-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting the Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Attempts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installing Packages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exporting-a-rootfs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exporting a Rootfs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searching Packages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#querying-the-package-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Querying the Package Index
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#listing-supported-distributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing Supported Distributions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#listing-available-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Listing Available Releases
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">cli</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">explanation</span>
+      
+    
+  </nav>
+
+
+  
+  
+
+
+<h1 id="cli-design">CLI Design</h1>
+<p>This page documents every design decision for the FlatRoot CLI, and the reasoning behind it — what each command's shape is, why positionals vs flags, why a particular name or convention, and how each choice ties back to the design rules below. For the full flag-by-flag reference and source-format grammar, see <a href="../../reference/cli/">CLI reference</a>.</p>
+<h2 id="design-principles">Design principles</h2>
+<p>The CLI design rules below synthesize established guidance from POSIX, GNU, clig.dev, 12-Factor CLI Apps, and the Heroku style guide. They stand independent of flatroot's specific choices; the per-subcommand sections that follow show where flatroot applies each rule and where it deviates.</p>
+<details class="note">
+<summary>Arguments and flags</summary>
+<ol>
+<li>
+<p><strong>Prefer flags over positional arguments.</strong></p>
+<blockquote>
+<p>"Prefer flags to args."
+— <a href="https://clig.dev">clig.dev, "Arguments and flags"</a>
+— <a href="https://medium.com/@jdxcode/12-factor-cli-apps-dd3c227a0e46">Jeff Dickey, <em>12 Factor CLI Apps</em>, factor 2</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Every short option has a long form; short letters reserved for the most-common options.</strong></p>
+<blockquote>
+<p>"Have full-length versions of every short option." ... "Short letters only for most-common flags."
+— <a href="https://clig.dev">clig.dev, "Arguments and flags"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Support bare <code>-</code> for stdin/stdout when the operand is a file.</strong></p>
+<blockquote>
+<p>"A <code>-</code> operand used alone as an argument following the options shall be interpreted ... as standard input or standard output." (Guideline 12)
+— <a href="https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html">POSIX.1-2017 §12.2</a>
+"Support <code>-</code> for stdin/stdout when input/output is a file."
+— <a href="https://clig.dev">clig.dev, "Arguments and flags"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Never accept secrets via flags.</strong></p>
+<blockquote>
+<p>"Never read secrets from flags — <code>--password foo</code> appears in <code>ps</code> and shell history."
+— <a href="https://clig.dev">clig.dev, "Arguments and flags"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Boolean flags use paired <code>--foo</code> / <code>--no-foo</code> for negation.</strong></p>
+<blockquote>
+<p>"Paired <code>--foo</code> / <code>--no-foo</code> for negation ... avoids the 'flag day' problem where adding a flag that changes the default breaks existing invocations."
+— <a href="https://www.gnu.org/prep/standards/html_node/Command_002dLine-Interfaces.html">GNU Coding Standards §4.6</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Reject arbitrary prefix abbreviation of long options.</strong></p>
+<blockquote>
+<p>"Don't accept arbitrary abbreviations (locks out future names)."
+— <a href="https://clig.dev">clig.dev, "Subcommands"</a></p>
+</blockquote>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Subcommands</summary>
+<ol>
+<li>
+<p><strong>Noun-verb when a noun has a family of verbs; bare plural or flat verb when one verb covers the domain.</strong></p>
+<blockquote>
+<p>"Noun-verb (<code>docker container create</code>, <code>aws s3 cp</code>, <code>gh pr list</code>) scales better to many resources and is preferred by clig.dev."
+— <a href="https://clig.dev">clig.dev, "Subcommands"</a>
+"Never create <code>*:list</code> subcommands — bare <code>heroku config</code> should list."
+— <a href="https://devcenter.heroku.com/articles/cli-style-guide">Heroku CLI Style Guide</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>No catch-all subcommands.</strong></p>
+<blockquote>
+<p>"Don't have catch-all subcommands (breaks future extensibility)."
+— <a href="https://clig.dev">clig.dev, "Subcommands"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Avoid ambiguous subcommand pairs.</strong></p>
+<blockquote>
+<p>"Avoid ambiguous pairs (don't ship both <code>update</code> and <code>upgrade</code>)."
+— <a href="https://clig.dev">clig.dev, "Subcommands"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Options not owned by any specific subcommand belong in the global scope.</strong></p>
+<p>A flag is <em>owned</em> by a subcommand if its meaning or value space changes depending on which subcommand runs it. Cross-cutting infrastructure (transport config, retry policy) and session context (which source, which cluster, which region) have identical meaning across every subcommand that uses them — those go at the tool root. Action-specific flags stay local to the subcommand they modify.</p>
+<blockquote>
+<p>Ecosystem precedent (no formal rule in the research set; each quotation below is from the tool's official reference):</p>
+<ul>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/"><code>kubectl --namespace</code> / <code>-n</code></a> — scopes an operation to a Kubernetes namespace. Global because every namespaced-resource verb (<code>get</code>, <code>apply</code>, <code>delete</code>, <code>logs</code>, <code>describe</code>) uses the same value with the same meaning; no single verb owns it.</li>
+<li><a href="https://docs.docker.com/reference/cli/docker/"><code>docker --host</code> / <code>-H</code></a> — <em>"Daemon socket to connect to."</em> Global because every docker verb (<code>ps</code>, <code>run</code>, <code>build</code>, <code>image ls</code>, <code>network create</code>) talks to the same daemon; the address is transport infrastructure, not action state.</li>
+<li><a href="https://git-scm.com/docs/git"><code>git --git-dir</code></a> — <em>"Set the path to the repository ('.git' directory)."</em> Listed in the SYNOPSIS as a top-level option that can appear before any subcommand. Global because every git command operates against a repository; <code>--git-dir</code> re-targets the entire toolchain at once.</li>
+<li><a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-options.html"><code>aws --region</code></a> — <em>"Specifies which AWS Region to send this command's AWS request to."</em> Global because AWS APIs are region-scoped; <code>s3</code>, <code>ec2</code>, <code>iam</code>, <code>lambda</code> all dispatch to the same region.</li>
+<li><a href="https://helm.sh/docs/helm/helm/"><code>helm --kube-context</code></a> — <em>"name of the kubeconfig context to use."</em> Global because every helm action (<code>install</code>, <code>upgrade</code>, <code>uninstall</code>, <code>list</code>, <code>status</code>) targets a cluster through the same context.</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Configuration and precedence</summary>
+<ol>
+<li>
+<p><strong>Precedence: CLI flags &gt; environment variables &gt; project config &gt; user config &gt; system config.</strong></p>
+<blockquote>
+<p>"Precedence: flags &gt; env &gt; project &gt; user &gt; system."
+— <a href="https://clig.dev">clig.dev, "Configuration"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Never accept secrets via environment variables.</strong></p>
+<blockquote>
+<p>"Do not read secrets from environment variables — they leak through <code>ps</code>, <code>/proc/*/environ</code>, <code>docker inspect</code>, <code>systemctl show</code>, child processes, and crash dumps."
+— <a href="https://clig.dev">clig.dev, "Environment variables"</a></p>
+</blockquote>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Interaction and safety</summary>
+<ol>
+<li>
+<p><strong>Confirm dangerous actions with severity-scaled friction.</strong></p>
+<blockquote>
+<p>"Mild = maybe prompt; moderate = definitely prompt or dry-run; severe = require typing a non-trivial confirmation string like the resource name."
+— <a href="https://clig.dev">clig.dev, "Interactivity"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>Never require an interactive prompt — always allow flags / args / stdin to bypass.</strong></p>
+<blockquote>
+<p>"Never require a prompt — always allow flags/args/stdin to bypass; if <code>--no-input</code> is passed, don't prompt."
+— <a href="https://clig.dev">clig.dev, "Interactivity"</a></p>
+</blockquote>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Extensibility</summary>
+<ol>
+<li>
+<p><strong>Changes are additive; warn before breaking.</strong></p>
+<blockquote>
+<p>"Keep changes additive; warn before breaking. Don't create 'time bombs'."
+— <a href="https://clig.dev">clig.dev, "Future-proofing"</a></p>
+</blockquote>
+</li>
+</ol>
+</details>
+<h2 id="global-options">Global options</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Required for</th>
+<th>Default</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--from &lt;SOURCE&gt;</code></td>
+<td>every subcommand that touches a distribution index</td>
+<td><em>(no default — command errors if missing)</em></td>
+<td>Identifies the distribution source; the <code>&lt;distro&gt;:&lt;release&gt;[@&lt;date&gt;]</code> DSL</td>
+</tr>
+<tr>
+<td><code>--arch &lt;ARCH&gt;</code></td>
+<td>(optional everywhere)</td>
+<td>Host architecture (<code>uname -m</code>)</td>
+<td>Target architecture for the rootfs; a comma-separated multiarch list is accepted by <code>install</code> only — <code>search</code>, <code>query</code>, and <code>analyze trace</code> take a single architecture</td>
+</tr>
+<tr>
+<td><code>--http-retries &lt;N&gt;</code></td>
+<td>(optional everywhere)</td>
+<td><code>3</code></td>
+<td>Max HTTP retry attempts for index + package downloads</td>
+</tr>
+<tr>
+<td><code>-v</code>, <code>--verbose</code></td>
+<td>(optional everywhere)</td>
+<td><code>false</code></td>
+<td>Emit diagnostic warnings that are hidden by default</td>
+</tr>
+</tbody>
+</table>
+<h3 id="selecting-the-distribution">Selecting the Distribution</h3>
+<p>The core of FlatRoot mechanism requires the selection of a remote to read and pull the linux distribution packages from. The selected flag for this was <code>--from</code>, on the global namespace, it defines internal data that is shared by existing commands and could be used by novel ones as well. The flag is analogous to the <code>FROM</code> clause in a <code>Dockerfile</code> to enhance usage intuition.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>search<span class="w"> </span>firefox-esr
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># docker pull — image reference DSL with the same &lt;name&gt;:&lt;variant&gt;[@&lt;qualifier&gt;] shape</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>pull<span class="w"> </span>debian:bookworm
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>docker<span class="w"> </span>pull<span class="w"> </span>debian:bookworm@sha256:abc123…
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># apt-get --target-release — flag-based release selection</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>apt-get<span class="w"> </span>--target-release<span class="o">=</span>bookworm<span class="w"> </span>install<span class="w"> </span>firefox
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># pip install --index-url — flag-based source-index selection</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>pip<span class="w"> </span>install<span class="w"> </span>--index-url<span class="w"> </span>https://pypi.org/simple/<span class="w"> </span>requests
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># cargo install --registry — flag-based registry selection</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>cargo<span class="w"> </span>install<span class="w"> </span>--registry<span class="w"> </span>my-registry<span class="w"> </span>my-crate
+</span></code></pre></div>
+</details>
+<h3 id="selecting-the-architecture">Selecting the Architecture</h3>
+<p>Cross-architecture builds are a core FlatRoot capability: a user on <code>x86_64</code> must be able to build a rootfs for <code>aarch64</code>, <code>riscv64</code>, or a multiarch target, independent of what their host CPU is. The selected flag for this was <code>--arch</code>, on the global namespace; it defines internal data (the target architecture) shared by every subcommand that resolves or downloads packages (per the rule of global scope for cross-cutting options). The flag name mirrors the kernel naming convention printed by <code>uname -m</code>, so <code>--arch x86_64</code> is the same string a user would write in any kernel-facing context.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Explicit flag</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>flatroot<span class="w"> </span>--arch<span class="w"> </span>aarch64<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./arm-root<span class="w"> </span>bash
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Multiarch — runs the pipeline once per architecture into the same directory</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>flatroot<span class="w"> </span>--arch<span class="w"> </span>x86_64,i686<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./multi<span class="w"> </span>bash
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Host arch is the default (equivalent to running without --arch)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./root<span class="w"> </span>bash
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># debootstrap --arch — closest analog, same domain (rootfs package install)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>debootstrap<span class="w"> </span>--arch<span class="o">=</span>amd64<span class="w"> </span>bookworm<span class="w"> </span>./root
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>debootstrap<span class="w"> </span>--arch<span class="o">=</span>arm64<span class="w"> </span>bookworm<span class="w"> </span>./arm-root
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># docker buildx --platform — multiarch builds, comma-separated like flatroot</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>docker<span class="w"> </span>buildx<span class="w"> </span>build<span class="w"> </span>--platform<span class="w"> </span>linux/amd64,linux/arm64<span class="w"> </span>.
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="c1"># cargo / rustc --target — cross-compile target triple</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>cargo<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>aarch64-unknown-linux-gnu
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>rustc<span class="w"> </span>--target<span class="w"> </span>x86_64-unknown-linux-gnu<span class="w"> </span>main.rs
+</span></code></pre></div>
+</details>
+<h3 id="network-attempts">Network Attempts</h3>
+<p>Networks between the user and distribution mirrors are inherently unreliable: connection resets, stale mirrors, transient 5xx responses. FlatRoot retries failed HTTP requests before surfacing an error. The selected flag for this was <code>--http-retries &lt;N&gt;</code>, on the global namespace; it defines internal data (retry budget) shared by every subcommand that performs HTTP, per the rule of global scope for cross-cutting options. The <code>http-</code> prefix makes the scope explicit: this budget governs HTTP requests only, not extraction or post-install steps. (A checksum mismatch triggers a single automatic re-download of that package, independent of this retry budget.)</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Default — the first try plus 3 retries (up to 4 attempts per request)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./root<span class="w"> </span>bash
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Increase for flaky networks or slow mirrors (first try plus 10 retries)</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>flatroot<span class="w"> </span>--http-retries<span class="w"> </span><span class="m">10</span><span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./root<span class="w"> </span>bash
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="c1"># Fail on first error (strict CI mode) — exactly one attempt, no retries</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>flatroot<span class="w"> </span>--http-retries<span class="w"> </span><span class="m">0</span><span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./root<span class="w"> </span>bash
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># curl --retry — the canonical HTTP retry flag</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>curl<span class="w"> </span>--retry<span class="w"> </span><span class="m">3</span><span class="w"> </span>https://example.com/pkg.tar.gz
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># wget --tries — same concept, older tradition</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>wget<span class="w"> </span>--tries<span class="o">=</span><span class="m">5</span><span class="w"> </span>https://example.com/pkg.tar.gz
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># skopeo copy --retry-times — retry semantics for OCI registry pulls</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>skopeo<span class="w"> </span>copy<span class="w"> </span>--retry-times<span class="w"> </span><span class="m">3</span><span class="w"> </span>docker://registry/image<span class="w"> </span>oci:./image
+</span></code></pre></div>
+</details>
+<h3 id="diagnostic-output">Diagnostic Output</h3>
+<p>Many subcommands emit per-item probe failures that do not affect the user-visible result — a release codename whose mirror serves a corrupt <code>Packages.gz</code>, an expected 404 during discovery, a single package whose optional metadata field is missing. Surfacing every such event by default floods stderr with noise in the common case; suppressing them entirely hides real anomalies from anyone trying to diagnose unexpected output. The selected flag for this was <code>--verbose</code> / <code>-v</code>, on the global namespace; it defines internal data (the verbose bit) consulted by any subcommand that distinguishes "trustworthy result, one thing skipped" from "result materially skewed, user must know". The short form mirrors the <code>-v</code> convention shared across <code>curl</code>, <code>ssh</code>, <code>rsync</code>, <code>wget</code>, and most GNU coreutils.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Default — quiet, only the structured release list on stdout</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian<span class="w"> </span>release<span class="w"> </span>list
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Verbose — diagnostic warnings surface on stderr</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>flatroot<span class="w"> </span>-v<span class="w"> </span>--from<span class="w"> </span>debian<span class="w"> </span>release<span class="w"> </span>list
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># curl -v — the canonical verbose flag</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>curl<span class="w"> </span>-v<span class="w"> </span>https://example.com/pkg.tar.gz
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># ssh -v / -vv / -vvv — verbose levels</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>ssh<span class="w"> </span>-v<span class="w"> </span>user@host
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># rsync -v — quiet by default, verbose per-file on -v</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>rsync<span class="w"> </span>-v<span class="w"> </span>./src/<span class="w"> </span>./dest/
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># wget -v — same convention</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>wget<span class="w"> </span>-v<span class="w"> </span>https://example.com/pkg.tar.gz
+</span></code></pre></div>
+</details>
+<h2 id="output">Output</h2>
+<p>The output side of the CLI is parameterized by stream (stdout vs. stderr), format (plain vs. JSON), and command category (mutating vs. reading). The principles below derive the per-command shapes documented under <a href="#installing-packages">Per-subcommand design</a>.</p>
+<details class="note">
+<summary>Output language</summary>
+<p><strong>Abstract syntax</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Tree   ::= Object | Array | Leaf
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>Object ::= { (Key, Tree)* }       (* keys unique within an Object *)
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>Array  ::= ( Tree )*
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>Leaf   ::= UTF-8, no &#39;\n&#39;
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>Key    ::= UTF-8, no &#39;.&#39;, no &#39;=&#39;
+</span></code></pre></div>
+<p>Traversal: pre-order DFS. Object members in lexicographic key order; Array members in index order.</p>
+<p><strong>Plain encoding (default)</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>plain     ::= leaf*
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>leaf      ::= path &#39;=&#39; value &#39;\n&#39;
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>path      ::= component ( &#39;.&#39; component )*
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>component ::= Key | Index             (* Key: see Abstract syntax *)
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>Index     ::= &#39;0&#39; | [1-9] [0-9]*
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>value     ::= UTF-8, no &#39;\n&#39;
+</span></code></pre></div>
+<p><strong>JSON encoding (<code>--format=json</code>)</strong></p>
+<p><a href="https://datatracker.ietf.org/doc/html/rfc8259">RFC 8259</a>, with:</p>
+<ul>
+<li>2-space indent (<code>serde_json::to_string_pretty</code>).</li>
+<li>Object members in lexicographic key order; Array members in index order.</li>
+<li>Every Leaf rendered as a JSON string.</li>
+<li>Trailing <code>\n</code>.</li>
+</ul>
+<p><strong>Empty Tree</strong></p>
+<p>Each reading command sets a per-command scope equal to its full command path (e.g. <code>analyze.trace.</code>, <code>search.</code>, <code>remote.list.</code>) on the plain encoding so consumers can identify the origin of every line. The JSON form omits the scope — it carries the same data tree without the print-time prefix.</p>
+<table>
+<thead>
+<tr>
+<th><code>--format</code></th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>plain</td>
+<td>(zero bytes)</td>
+</tr>
+<tr>
+<td>json</td>
+<td><code>[]\n</code> (root is an Array for every reading command)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example</strong></p>
+<p><code>flatroot --from debian:bookworm analyze trace bash</code> emits one entry per package, carrying keys <code>depends_on</code>, <code>name</code>, <code>reason</code>, <code>sonames_consumed</code>, <code>sonames_provided</code>, <code>unresolved_sonames</code>, and <code>version</code> — in lex order at every Object level. The <code>sonames_consumed</code> and <code>unresolved_sonames</code> arrays carry <code>(binary, provider, soname)</code> and <code>(binary, soname)</code> records respectively. Two-entry sample:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>analyze.trace.0.depends_on.0=gawk
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>analyze.trace.0.name=base-files
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>analyze.trace.0.reason=declared
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>analyze.trace.0.version=12.4+deb12u13
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>analyze.trace.1.depends_on.0=base-files
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>analyze.trace.1.depends_on.1=libc6
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>analyze.trace.1.name=bash
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>analyze.trace.1.reason=target
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>analyze.trace.1.sonames_consumed.0.binary=usr/bin/bash
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>analyze.trace.1.sonames_consumed.0.provider=libc6
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>analyze.trace.1.sonames_consumed.0.soname=libc.so.6
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>analyze.trace.1.version=5.2.15-2+b10
+</span></code></pre></div>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">[</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="p">{</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&quot;depends_on&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;gawk&quot;</span><span class="p">],</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;base-files&quot;</span><span class="p">,</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;declared&quot;</span><span class="p">,</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="nt">&quot;sonames_consumed&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="nt">&quot;sonames_provided&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="nt">&quot;unresolved_sonames&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12.4+deb12u13&quot;</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">  </span><span class="p">{</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="nt">&quot;depends_on&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;base-files&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;libc6&quot;</span><span class="p">],</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bash&quot;</span><span class="p">,</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">    </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;target&quot;</span><span class="p">,</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">    </span><span class="nt">&quot;sonames_consumed&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;binary&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;usr/bin/bash&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;libc6&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;soname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;libc.so.6&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="w">    </span><span class="p">],</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="w">    </span><span class="nt">&quot;sonames_provided&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="w">    </span><span class="nt">&quot;unresolved_sonames&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5.2.15-2+b10&quot;</span>
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="p">]</span>
+</span></code></pre></div>
+<p><strong>Implementation</strong></p>
+<p>The plain encoder lives at <a href="https://github.com/flatroot/flatroot/blob/master/src/internal/printer_plain.rs"><code>src/internal/printer_plain.rs</code></a> as <code>PrinterPlain</code>. Commands push leaves, arrays, and nested objects through its imperative API (<code>push_string</code>, <code>push_array</code>, <code>push_object</code>, <code>push_array_objects</code>, <code>array</code>); the printer enforces lex ordering at every Object level and validates spec invariants (no <code>.</code>/<code>=</code> in keys, no <code>\n</code> in leaves) at render time. No command writes dotted lines by hand — every plain line goes through the shared encoder so the spec is enforced in exactly one place.</p>
+</details>
+<details class="note">
+<summary>Streams</summary>
+<ol>
+<li>
+<p><strong>stdout for data, stderr for diagnostics.</strong> Errors, warnings, prompts, progress indicators, and command framing all go to stderr; a piped consumer of stdout never sees diagnostic noise.</p>
+<blockquote>
+<p>"Send output to stdout. Send messaging to stderr. Log messages, errors, and so on should all be sent to stderr."
+— <a href="https://clig.dev">clig.dev, "Output"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>A command's stdout shape is its data contract.</strong> Once published, treat it as an API — additions are backward-compatible, reorderings and deletions are not.</p>
+<blockquote>
+<p>"Generally this means additional information is OK, but modifying existing output is problematic."
+— <a href="https://devcenter.heroku.com/articles/cli-style-guide">Heroku CLI Style Guide</a></p>
+</blockquote>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Output format</summary>
+<ol>
+<li>
+<p><strong>Human-readable plain text by default; JSON opt-in.</strong></p>
+<blockquote>
+<p>"Human-readable output is paramount. Humans come first, machines second."
+— <a href="https://clig.dev">clig.dev, "Output"</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>The plain format is dotted <code>KEY=VALUE</code>.</strong> One record per line, hierarchical paths separated by <code>.</code>, a single <code>=</code> separating key from value. Bijective with JSON for the structured reports; round-trips losslessly. (The <code>query</code> command is the exception: its plain form drops SQL <code>NULL</code> cells and empty arrays, which JSON preserves as <code>null</code>/<code>[]</code>, so query's two encodings are not bijective.) Models the convention used by <code>sysctl -a</code>, <code>git config --list</code>, <code>/etc/os-release</code>, and Java <code>.properties</code> files.</p>
+</li>
+<li>
+<p><strong>Composes with bare POSIX tooling without external parsers.</strong> <code>grep '^trace\.'</code> filters a section, <code>cut -d= -f2-</code> extracts a value, line orientation lets <code>sort -u</code> and <code>xargs</code> work on individual leaves.</p>
+</li>
+<li>
+<p><strong>No tables.</strong> Borderless ASCII tables fail the line-orientation contract — column padding shifts when content widens, multi-row entries break <code>grep</code>/<code>cut</code> alignment, and nested data has no place to live. The plain encoding replaces every table flatroot would otherwise emit.</p>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Command output contracts</summary>
+<p>Output behavior is fixed per command category, independent of which command applies it.</p>
+<ol>
+<li>
+<p><strong>Mutating commands are silent on stdout.</strong> <code>install</code> and <code>export</code> produce side effects (file extraction, archive writing) and emit no stdout; stderr carries progress indicators and status lines.</p>
+</li>
+<li>
+<p><strong>Reading commands emit data on stdout.</strong> <code>search</code>, <code>query</code>, <code>remote list</code>, <code>release list</code>, and <code>analyze trace</code> produce dotted <code>KEY=VALUE</code> by default; respect <code>--format</code>.</p>
+</li>
+<li>
+<p><strong>Empty results emit no lines.</strong> A <code>search</code> whose pattern matches nothing produces 0 bytes on stdout. Exit code conveys success; absence of output conveys emptiness.</p>
+</li>
+</ol>
+</details>
+<details class="note">
+<summary>Format flag</summary>
+<ol>
+<li>
+<p><strong><code>--format</code> is family-level — documented once, applied to every reading command.</strong></p>
+</li>
+<li>
+<p><strong>Values: <code>plain</code> (default), <code>json</code>.</strong> Both are part of the structured-output contract and are bijective for the structured reports — the same data in two syntaxes. (<code>query</code> is the exception, where the plain form drops SQL <code>NULL</code> cells that JSON keeps.)</p>
+</li>
+<li>
+<p><strong>Mutating commands reject <code>--format</code> for the encoding role.</strong> A silent command has no encoding to choose. <code>export --format=&lt;archive-type&gt;</code> uses <code>--format</code> for a different role — selecting the output archive container (<code>oci</code>, <code>tar</code>, <code>dwarfs</code>, <code>sqfs</code>) — and is not the structured-output flag.</p>
+</li>
+</ol>
+</details>
+<h2 id="installing-packages">Installing Packages</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>flatroot install -o &lt;PATH&gt; [OPTIONS] &lt;PATTERNS&gt;...
+</span></code></pre></div>
+<p>The primary function of FlatRoot is to build rootfs filesystems by resolving and extracting packages from a selected distribution into a target directory. The selected subcommand for this was <code>install</code>. Its subjects are the packages to install — named directly, or through a library or installed-path pattern under <code>--type</code> — so the pattern list is variadic and positional, matching the universal package-manager convention. The target directory is where the installation lands, so it is named by <code>-o &lt;PATH&gt;</code> / <code>--output &lt;PATH&gt;</code>.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Explicit target</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./rootfs<span class="w"> </span>bash
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Target from env (common in CI / container builds)</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">FLATROOT_ARG_INSTALL_OUTPUT</span><span class="o">=</span>/build/rootfs
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>bash<span class="w"> </span>python3
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># rpm --root — install packages into an alternate root via flag; variadic positional</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>rpm<span class="w"> </span>--root<span class="o">=</span>/target<span class="w"> </span>-i<span class="w"> </span>pkg1.rpm<span class="w"> </span>pkg2.rpm
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># dpkg --root — same pattern as rpm</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>dpkg<span class="w"> </span>--root<span class="o">=</span>/target<span class="w"> </span>-i<span class="w"> </span>pkg1.deb<span class="w"> </span>pkg2.deb
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># apt / dnf / pacman / apk — the variadic-positional package list is universal</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>apt<span class="w"> </span>install<span class="w"> </span>bash<span class="w"> </span>python3<span class="w"> </span>git
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>dnf<span class="w"> </span>install<span class="w"> </span>bash<span class="w"> </span>python3<span class="w"> </span>git
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>pacman<span class="w"> </span>-S<span class="w"> </span>bash<span class="w"> </span>python<span class="w"> </span>python-pip
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>apk<span class="w"> </span>add<span class="w"> </span>bash<span class="w"> </span>python3<span class="w"> </span>git
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="c1"># cc -o — structural analog: flag output, variadic inputs</span>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>cc<span class="w"> </span>-o<span class="w"> </span>prog<span class="w"> </span>a.c<span class="w"> </span>b.c<span class="w"> </span>c.c
+</span></code></pre></div>
+</details>
+<p><strong>Choosing one package when a file matches many (<code>--match</code>)</strong></p>
+<p>The flags <code>--type path</code> and <code>--type library</code> let you ask for a package by a file it installs or a library it provides, instead of by name. The catch is that one file usually belongs to many packages. On Debian, ten different mail servers all ship <code>usr/sbin/sendmail</code>, so asking for that path alone installs all ten:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>$<span class="w"> </span>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./root<span class="w"> </span>--type<span class="w"> </span>path<span class="w"> </span>usr/sbin/sendmail
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>Resolved<span class="w"> </span><span class="s1">&#39;usr/sbin/sendmail&#39;</span><span class="w"> </span>-&gt;<span class="w"> </span>courier-mta<span class="w"> </span>dma<span class="w"> </span>exim4-daemon-light<span class="w"> </span>…<span class="w"> </span>postfix<span class="w"> </span>ssmtp<span class="w">   </span><span class="c1"># all 10 installed</span>
+</span></code></pre></div>
+<p><code>--match all</code> narrows that down. List a second file that only the package you actually want ships, and <code>--match all</code> keeps just the package that has <strong>both</strong>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>$<span class="w"> </span>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>install<span class="w"> </span>-o<span class="w"> </span>./root<span class="w"> </span>--type<span class="w"> </span>path<span class="w"> </span>--match<span class="w"> </span>all<span class="w"> </span>usr/sbin/sendmail<span class="w"> </span>usr/sbin/postfix
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>Resolved<span class="w"> </span><span class="s1">&#39;usr/sbin/postfix&#39;</span><span class="w"> </span>-&gt;<span class="w"> </span>postfix<span class="w">     </span><span class="c1"># only postfix ships both → installs postfix alone</span>
+</span></code></pre></div>
+<p>The default, <code>--match any</code>, keeps every match; <code>--match all</code> is the opt-in for narrowing. The flag works the same way on all three commands that take <code>--type</code> — <code>install</code>, <code>search</code>, and <code>analyze trace</code> — so you can check which package you land on with <code>search</code> before installing:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>$<span class="w"> </span>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>search<span class="w"> </span>--type<span class="w"> </span>path<span class="w"> </span>--match<span class="w"> </span>all<span class="w"> </span>usr/sbin/sendmail<span class="w"> </span>usr/sbin/postfix
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>search.0.name<span class="o">=</span>postfix
+</span></code></pre></div>
+<p><code>--match all</code> is rejected with <code>--type package</code>: a package name already names exactly one package, so there is nothing to narrow.</p>
+<h2 id="exporting-a-rootfs">Exporting a Rootfs</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>flatroot export [--format FMT] [--tag TAG] &lt;SRC_DIR&gt; &lt;OUTPUT&gt;
+</span></code></pre></div>
+<p>A second FlatRoot function is to package a built rootfs as a portable artifact — a tar archive, an OCI image, or a SquashFS / DwarFS filesystem — for use in other runtimes. The selected subcommand for this was <code>export</code>. It has exactly one source (the rootfs directory) and one destination (the output file), so both are positional, following the <code>cp src dest</code> shape. The output format is a qualifier of the destination rather than the destination itself, so it is named by <code>--format &lt;FMT&gt;</code>; <code>--format</code> is inferred when the file extension is unique (<code>.sqfs</code>, <code>.squashfs</code>, <code>.dwarfs</code>, <code>.tar.gz</code>) and required when ambiguous (<code>.tar</code>: the <code>tar</code> shape is always gzip-compressed and OCI wraps its layout in an outer uncompressed tar, so a bare <code>.tar</code> name cannot say which of the two is meant).</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Extension uniquely identifies the format</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>flatroot<span class="w"> </span><span class="nb">export</span><span class="w"> </span>./rootfs<span class="w"> </span>out.tar.gz
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>flatroot<span class="w"> </span><span class="nb">export</span><span class="w"> </span>./rootfs<span class="w"> </span>out.sqfs
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>flatroot<span class="w"> </span><span class="nb">export</span><span class="w"> </span>./rootfs<span class="w"> </span>out.dwarfs
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># Ambiguous .tar — disambiguate with --format</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>flatroot<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--format<span class="w"> </span>tar<span class="w"> </span>./rootfs<span class="w"> </span>out.tar
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>flatroot<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--format<span class="w"> </span>oci<span class="w"> </span>--tag<span class="w"> </span>myapp:v1.0<span class="w"> </span>./rootfs<span class="w"> </span>image.tar
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># cp / mv / rsync — canonical positional src-then-dest shape</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>cp<span class="w"> </span>-a<span class="w"> </span>./rootfs<span class="w"> </span>./copy
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>rsync<span class="w"> </span>-a<span class="w"> </span>./rootfs/<span class="w"> </span>./copy/
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>mv<span class="w"> </span>./rootfs<span class="w"> </span>./archive
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="c1"># mksquashfs — rootfs-to-archive analog, same positional shape</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>mksquashfs<span class="w"> </span>./rootfs<span class="w"> </span>out.sqfs
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="c1"># skopeo copy — src-then-dest for OCI image transfers</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>skopeo<span class="w"> </span>copy<span class="w"> </span>oci:./local/image<span class="w"> </span>docker://registry/image
+</span></code></pre></div>
+</details>
+<h2 id="searching-packages">Searching Packages</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>flatroot search [--type TYPE] [--format FMT] &lt;PATTERNS&gt;...
+</span></code></pre></div>
+<p>Before installing, users often need to discover which packages the selected distribution actually exposes and under what name. The selected subcommand for this was <code>search</code>. Its subjects are the name patterns, so they are variadic positional arguments — one or more, unioned and deduplicated — following the universal package-manager convention. <code>--type</code> selects whether the patterns match package names, library files, or installed paths; <code>--format</code> picks the output encoding. Glob wildcards (<code>*</code>, <code>?</code>, <code>[abc]</code>) are accepted so one invocation can match a family of names.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Exact name</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>search<span class="w"> </span>firefox-esr
+</span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+</span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># Glob wildcards — quote to prevent shell expansion</span>
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>search<span class="w"> </span><span class="s1">&#39;firefox*&#39;</span>
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>search<span class="w"> </span><span class="s1">&#39;*gtk*&#39;</span>
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>search<span class="w"> </span><span class="s1">&#39;python3.??&#39;</span>
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># apt / dnf / pacman / apk / zypper — positional pattern across every package manager</span>
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>apt<span class="w"> </span>search<span class="w"> </span>firefox
+</span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>dnf<span class="w"> </span>search<span class="w"> </span>firefox
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>pacman<span class="w"> </span>-Ss<span class="w"> </span>firefox
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>apk<span class="w"> </span>search<span class="w"> </span>firefox
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>zypper<span class="w"> </span>search<span class="w"> </span>firefox
+</span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>
+</span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="c1"># find / grep — shell-level positional pattern search, the wider Unix convention</span>
+</span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>find<span class="w"> </span>.<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;firefox*&#39;</span>
+</span><span id="__span-23-10"><a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>grep<span class="w"> </span>-rl<span class="w"> </span><span class="s1">&#39;firefox&#39;</span><span class="w"> </span>.
+</span></code></pre></div>
+</details>
+<h2 id="querying-the-package-index">Querying the Package Index</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>flatroot query [FILE]
+</span></code></pre></div>
+<p>FlatRoot's package index is a SQLite database, and users occasionally need programmatic access for custom analyses — finding every package with a given dependency, counting packages by section, comparing two distributions. The selected subcommand for this was <code>query</code>. It reads SQL from a positional file argument, or from stdin when the argument is omitted or given as <code>-</code> (per the bare-<code>-</code> stdin convention, matching <code>cat</code> / <code>wc</code>).</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># SQL from a file</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>query<span class="w"> </span>report.sql
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="c1"># SQL from stdin (implicit — bare invocation)</span>
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;SELECT count(*) FROM packages&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>query
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>
+</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="c1"># SQL from stdin (explicit -)</span>
+</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian:bookworm<span class="w"> </span>query<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;&#39;SQL&#39;</span>
+</span><span id="__span-25-9"><a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="s">SELECT name FROM packages WHERE essential = 1;</span>
+</span><span id="__span-25-10"><a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="s">SQL</span>
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># cat — positional file, bare stdin, explicit -</span>
+</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>cat<span class="w"> </span>report.txt
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>cat<span class="w">                      </span><span class="c1"># implicit stdin</span>
+</span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>cat<span class="w"> </span>-<span class="w">                    </span><span class="c1"># explicit stdin</span>
+</span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>
+</span><span id="__span-26-6"><a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="c1"># wc — same pattern</span>
+</span><span id="__span-26-7"><a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>wc<span class="w"> </span>access.log
+</span><span id="__span-26-8"><a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>wc<span class="w"> </span>&lt;<span class="w"> </span>access.log<span class="w">          </span><span class="c1"># implicit stdin</span>
+</span><span id="__span-26-9"><a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>wc<span class="w"> </span>-<span class="w">                     </span><span class="c1"># explicit stdin</span>
+</span><span id="__span-26-10"><a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>
+</span><span id="__span-26-11"><a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a><span class="c1"># od — optional positional file, stdin default</span>
+</span><span id="__span-26-12"><a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>od<span class="w"> </span>binary.bin
+</span><span id="__span-26-13"><a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a>od<span class="w">                       </span><span class="c1"># implicit stdin</span>
+</span><span id="__span-26-14"><a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a>od<span class="w"> </span>-<span class="w">                     </span><span class="c1"># explicit stdin</span>
+</span></code></pre></div>
+</details>
+<h2 id="listing-supported-distributions">Listing Supported Distributions</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>flatroot remote list
+</span></code></pre></div>
+<p>Before selecting a distribution with <code>--from</code>, users need to know which remotes FlatRoot supports. The selected subcommand for this was <code>remote list</code>, under a <code>remote</code> noun group. The grouping follows the rule of noun-verb grouping for extensible domains, leaving room for additional verbs — e.g. inspecting or adding a specific remote — without renaming the existing verb. No <code>--from</code> needed; the command reports what can go <em>into</em> <code>--from</code>.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># List all supported distribution backends</span>
+</span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>flatroot<span class="w"> </span>remote<span class="w"> </span>list
+</span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="c1"># Extract just the remote names for downstream use</span>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>flatroot<span class="w"> </span>remote<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s1">&#39;\.name=&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="o">=</span><span class="w"> </span>-f2
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># git remote — the archetypal noun with a verb family</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>git<span class="w"> </span>remote<span class="w">                     </span><span class="c1"># list (implicit)</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>origin<span class="w"> </span>https://example.com/repo.git
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>git<span class="w"> </span>remote<span class="w"> </span>show<span class="w"> </span>origin
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>
+</span><span id="__span-29-6"><a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="c1"># docker image — noun group with a verb family</span>
+</span><span id="__span-29-7"><a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>docker<span class="w"> </span>image<span class="w"> </span>ls
+</span><span id="__span-29-8"><a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a>docker<span class="w"> </span>image<span class="w"> </span>pull<span class="w"> </span>ubuntu
+</span><span id="__span-29-9"><a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a>docker<span class="w"> </span>image<span class="w"> </span>rm<span class="w"> </span>myimage
+</span><span id="__span-29-10"><a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a>
+</span><span id="__span-29-11"><a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a><span class="c1"># gh repo — noun-verb for GitHub repositories</span>
+</span><span id="__span-29-12"><a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a>gh<span class="w"> </span>repo<span class="w"> </span>list
+</span><span id="__span-29-13"><a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a>gh<span class="w"> </span>repo<span class="w"> </span>view
+</span><span id="__span-29-14"><a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a>gh<span class="w"> </span>repo<span class="w"> </span>clone
+</span></code></pre></div>
+</details>
+<h2 id="listing-available-releases">Listing Available Releases</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>flatroot --from &lt;DISTRO&gt; release list
+</span></code></pre></div>
+<p>Once a user has picked a distribution, they often need to know which specific releases (versions) that distribution actually serves. The selected subcommand for this was <code>release list</code>, under a <code>release</code> noun group. The grouping follows the rule of noun-verb grouping for extensible domains, leaving room for additional verbs — e.g. showing details for a specific release — without renaming the existing one. Only the distro prefix is needed in <code>--from</code> (e.g. <code>debian</code>, not <code>debian:bookworm</code>), since the whole point is discovering what goes after the colon.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="c1"># List available Debian releases</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian<span class="w"> </span>release<span class="w"> </span>list
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="c1"># Pipe through grep to find a specific one</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>flatroot<span class="w"> </span>--from<span class="w"> </span>debian<span class="w"> </span>release<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>bookworm
+</span></code></pre></div>
+<details class="note">
+<summary>Precedent</summary>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># gh release list — direct functional analog, same noun-verb shape</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>gh<span class="w"> </span>release<span class="w"> </span>list<span class="w"> </span>--repo<span class="w"> </span>owner/repo
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="c1"># npm view &lt;pkg&gt; versions — enumerate available versions of a package</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>npm<span class="w"> </span>view<span class="w"> </span>react<span class="w"> </span>versions
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>
+</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="c1"># git tag — enumerate release tags in a repository</span>
+</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>git<span class="w"> </span>tag
+</span></code></pre></div>
+</details>
+<h2 id="related-pages">Related pages</h2>
+<ul>
+<li>Reference / <strong><a href="../../reference/cli/">CLI Reference</a></strong> — The tree below summarises every accepted flag at a glance; the sections that follow document each command, its options, the <distro>:<release>[@<date>] source format, the...<br><span class="md-tag md-tag--matched">cli</span> <span class="md-tag">reference</span></li>
+<li>Reference / <strong><a href="../../reference/environment/">Environment Variables</a></strong> — This page covers the environment variables used by FlatRoot, which are split into internal behavior and CLI fallback flags.<br><span class="md-tag md-tag--matched">cli</span> <span class="md-tag">configuration</span></li>
+<li>Explanation / <strong><a href="../../explanation/conditional-dependencies/">Conditional dependencies</a></strong> — The main BFS walk described in Dependency resolution handles every dependency that can be evaluated from the index alone. A package declares it needs another package; the...<br><span class="md-tag md-tag--matched">explanation</span> <span class="md-tag">resolver</span> <span class="md-tag">dependencies</span></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.select", "content.code.annotate", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../assets/javascripts/panzoom.min.js"></script>
+      
+        <script src="../../assets/javascripts/zoompan.js"></script>
+      
+    
+  </body>
+</html>

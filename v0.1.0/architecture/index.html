@@ -1,0 +1,1379 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Build Linux root filesystem directories from official distribution packages — without root privileges or a running package manager." name="description"/>
+<link href="https://flatroot.github.io/docs/v0.1.0/architecture/" rel="canonical"/>
+<link href="../explanation/multiarch/" rel="prev"/>
+<link href="cli/" rel="next"/>
+<link href="../assets/logo.svg" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.7" name="generator"/>
+<title>Overview - FlatRoot</title>
+<link href="../assets/stylesheets/main.ec1eaa64.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<link href="../assets/stylesheets/panzoom.css" rel="stylesheet"/>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<style>.md-typeset .md-tag.md-tag--matched{background-color:var(--md-accent-fg-color,#448aff);color:#fff}</style><meta name="panzoom-theme" content="material">
+<meta name="panzoom-data" content='{"selectors": [".mermaid", ".d2", ".drawio"], "initial_zoom_level": 1.0}'> </head>
+<body data-md-color-accent="indigo" data-md-color-primary="black" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#architecture">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<div data-md-color-scheme="default" data-md-component="outdated" hidden="">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="FlatRoot" class="md-header__button md-logo" data-md-component="logo" href=".." title="FlatRoot">
+<img alt="logo" src="../assets/logo.svg"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            FlatRoot
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Overview
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/flatroot/flatroot" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="FlatRoot" class="md-nav__button md-logo" data-md-component="logo" href=".." title="FlatRoot">
+<img alt="logo" src="../assets/logo.svg"/>
+</a>
+    FlatRoot
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/flatroot/flatroot" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorials/first-rootfs/">
+<span class="md-ellipsis">
+    
+  
+    Build your first rootfs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../tutorials/reproducible-builds/">
+<span class="md-ellipsis">
+    
+  
+    Reproducible Builds
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    How-To Guides
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    How-To Guides
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how-to/get-flatroot/">
+<span class="md-ellipsis">
+    
+  
+    Get FlatRoot
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how-to/install-packages/">
+<span class="md-ellipsis">
+    
+  
+    Install Packages
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how-to/query-packages/">
+<span class="md-ellipsis">
+    
+  
+    Query Packages
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how-to/pinning/">
+<span class="md-ellipsis">
+    
+  
+    Pinning
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../how-to/multiarch/">
+<span class="md-ellipsis">
+    
+  
+    Multiple Architectures
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/cli/">
+<span class="md-ellipsis">
+    
+  
+    CLI
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/environment/">
+<span class="md-ellipsis">
+    
+  
+    Environment
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/cache/">
+<span class="md-ellipsis">
+    
+  
+    Cache
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/database/">
+<span class="md-ellipsis">
+    
+  
+    Database
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/path_index/">
+<span class="md-ellipsis">
+    
+  
+    Path Index
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/metadata/">
+<span class="md-ellipsis">
+    
+  
+    Rootfs Metadata
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_4_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4_7" id="__nav_4_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Package Formats
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_4_7_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_4_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Package Formats
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/package-formats/deb/">
+<span class="md-ellipsis">
+    
+  
+    deb
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/package-formats/rpm/">
+<span class="md-ellipsis">
+    
+  
+    rpm
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/package-formats/pacman/">
+<span class="md-ellipsis">
+    
+  
+    pacman
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/package-formats/apk/">
+<span class="md-ellipsis">
+    
+  
+    apk
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Explanation
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Explanation
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/the-distro-abstraction/">
+<span class="md-ellipsis">
+    
+  
+    The distro abstraction
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/the-seed-list/">
+<span class="md-ellipsis">
+    
+  
+    The seed list
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/dependency-resolution/">
+<span class="md-ellipsis">
+    
+  
+    Dependency resolution
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/virtual-names-and-providers/">
+<span class="md-ellipsis">
+    
+  
+    Virtual names and providers
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/conditional-dependencies/">
+<span class="md-ellipsis">
+    
+  
+    Conditional dependencies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/the-sandbox/">
+<span class="md-ellipsis">
+    
+  
+    The sandbox
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/cache-regeneration/">
+<span class="md-ellipsis">
+    
+  
+    Cache regeneration
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/the-metadata-layer/">
+<span class="md-ellipsis">
+    
+  
+    The metadata layer
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/cross-distro-boundaries/">
+<span class="md-ellipsis">
+    
+  
+    Cross-distro boundaries
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../explanation/multiarch/">
+<span class="md-ellipsis">
+    
+  
+    Multiarch
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_6_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-pipeline">
+<span class="md-ellipsis">
+      
+        The pipeline
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#related-pages">
+<span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="cli/">
+<span class="md-ellipsis">
+    
+  
+    CLI Design
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="packages/">
+<span class="md-ellipsis">
+    
+  
+    Packages
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_6_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Spec
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_6_4_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_6_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Spec
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/install/">
+<span class="md-ellipsis">
+    
+  
+    Installing Packages
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/search/">
+<span class="md-ellipsis">
+    
+  
+    Searching Packages
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/query/">
+<span class="md-ellipsis">
+    
+  
+    Querying the Catalogue
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/remotes/">
+<span class="md-ellipsis">
+    
+  
+    Listing Distributions
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/releases/">
+<span class="md-ellipsis">
+    
+  
+    Listing Releases
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/export/">
+<span class="md-ellipsis">
+    
+  
+    Exporting a Rootfs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="spec/trace/">
+<span class="md-ellipsis">
+    
+  
+    Tracing Dependencies
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_7">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_1" id="__nav_7_1_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    System
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_1_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_1">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    System
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/system/rootfs/">
+<span class="md-ellipsis">
+    
+  
+    Rootfs
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/system/chroot/">
+<span class="md-ellipsis">
+    
+  
+    chroot
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/system/bubblewrap/">
+<span class="md-ellipsis">
+    
+  
+    bubblewrap
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/system/ldconfig/">
+<span class="md-ellipsis">
+    
+  
+    ldconfig
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/system/soname/">
+<span class="md-ellipsis">
+    
+  
+    Shared-library sonames
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Packages
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_2_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Packages
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/packages/virtual/">
+<span class="md-ellipsis">
+    
+  
+    Virtual Packages
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/packages/contents-indices/">
+<span class="md-ellipsis">
+    
+  
+    Contents Indices
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/packages/sbom/">
+<span class="md-ellipsis">
+    
+  
+    SBOM
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Dependencies
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_3_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Dependencies
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/dependencies/alternatives/">
+<span class="md-ellipsis">
+    
+  
+    Alternatives
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/dependencies/rich/">
+<span class="md-ellipsis">
+    
+  
+    Rich Dependencies
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/dependencies/install-if/">
+<span class="md-ellipsis">
+    
+  
+    Install-If Triggers
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/dependencies/bfs/">
+<span class="md-ellipsis">
+    
+  
+    BFS Traversal
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/dependencies/ast/">
+<span class="md-ellipsis">
+    
+  
+    Rich-Dep AST
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Versioning
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_4_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_4">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Versioning
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/versioning/glibc/">
+<span class="md-ellipsis">
+    
+  
+    glibc
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/versioning/snapshot-pinning/">
+<span class="md-ellipsis">
+    
+  
+    Snapshot Pinning
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/versioning/version-comparison/">
+<span class="md-ellipsis">
+    
+  
+    Version Comparison
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Post-Install
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_5_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_5">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Post-Install
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/postinstall/stubs/">
+<span class="md-ellipsis">
+    
+  
+    Stub Commands
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/postinstall/base-packages/">
+<span class="md-ellipsis">
+    
+  
+    Base Packages
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_7_6" type="checkbox"/>
+<label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Formats
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_7_6_label" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_7_6">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Formats
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/formats/ar/">
+<span class="md-ellipsis">
+    
+  
+    ar (deb archive)
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/formats/cpio/">
+<span class="md-ellipsis">
+    
+  
+    cpio (rpm payload)
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/formats/rfc822/">
+<span class="md-ellipsis">
+    
+  
+    RFC822 records
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/formats/oci/">
+<span class="md-ellipsis">
+    
+  
+    OCI image
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/formats/dwarfs/">
+<span class="md-ellipsis">
+    
+  
+    DwarFS
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../appendix/formats/squashfs/">
+<span class="md-ellipsis">
+    
+  
+    SquashFS
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-pipeline">
+<span class="md-ellipsis">
+      
+        The pipeline
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#related-pages">
+<span class="md-ellipsis">
+      
+        Related pages
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<nav class="md-tags">
+<span class="md-tag">architecture</span>
+<span class="md-tag">pipeline</span>
+</nav>
+<h1 id="architecture">Architecture</h1>
+<p>FlatRoot is a single binary that resolves, downloads, extracts, and post-installs distro packages into an unprivileged rootfs directory. The pipeline runs as an ordered sequence of stages — backend selection, index fetch, seed assembly, dependency resolution, download, extraction, post-install scripts, and cache regeneration. Each stage returns a typed outcome consumed by the next stage or by the manifest writer.</p>
+<h2 id="the-pipeline">The pipeline</h2>
+<p><div class="mxgraph" data-mxgraph='{"toolbar-position": "bottom", "toolbar-nohide": "0", "tooltips": "1", "border": 5, "resize": "1", "edit": "_blank", "lightbox": "1", "toolbar": "pages tags zoom layers lightbox", "xml": "&lt;mxfile host=\"65bd71144e\"&gt;&lt;diagram name=\"Install pipeline\" id=\"page1\"&gt;\n        &lt;mxGraphModel dx=\"939\" dy=\"783\" grid=\"1\" gridSize=\"10\" guides=\"1\" tooltips=\"1\" connect=\"1\" arrows=\"1\" fold=\"1\" page=\"1\" pageScale=\"1\" pageWidth=\"1100\" pageHeight=\"680\" math=\"0\" shadow=\"0\"&gt;\n            &lt;root&gt;\n                &lt;mxCell id=\"0\"/&gt;\n                &lt;mxCell id=\"1\" parent=\"0\"/&gt;\n                &lt;mxCell id=\"title\" value=\"&amp;lt;b&amp;gt;Install Pipeline&amp;lt;/b&amp;gt;\" style=\"text;html=1;align=center;verticalAlign=middle;fontSize=16;fontColor=#333333;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"400\" y=\"10\" width=\"200\" height=\"30\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"mirror\" value=\"&amp;lt;b&amp;gt;Distribution&amp;lt;br&amp;gt;mirror&amp;lt;/b&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=12;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"30\" y=\"60\" width=\"130\" height=\"50\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"fetch\" value=\"&amp;lt;b&amp;gt;Fetch &amp;amp;amp; parse&amp;lt;br&amp;gt;index&amp;lt;/b&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"230\" y=\"60\" width=\"130\" height=\"50\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"index\" value=\"&amp;lt;b&amp;gt;Flat package&amp;lt;br&amp;gt;table&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;every package in the&amp;lt;br&amp;gt;repo with its deps,&amp;lt;br&amp;gt;provides, version&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"430\" y=\"47.5\" width=\"150\" height=\"75\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e1\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#999999;\" parent=\"1\" source=\"mirror\" target=\"fetch\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e2\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;\" parent=\"1\" source=\"fetch\" target=\"index\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"seeds\" value=\"&amp;lt;b&amp;gt;Seed packages&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;user-requested +&amp;lt;br&amp;gt;base + essential&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"660\" y=\"50\" width=\"130\" height=\"65\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"resolve\" value=\"&amp;lt;b&amp;gt;BFS dependency&amp;lt;br&amp;gt;resolver&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;walk deps, resolve&amp;lt;br&amp;gt;virtuals, check versions,&amp;lt;br&amp;gt;fixpoint loops&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"430\" y=\"170\" width=\"150\" height=\"85\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e3\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;\" parent=\"1\" source=\"index\" target=\"resolve\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e3b\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#999999;entryX=1;entryY=0.25;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;\" parent=\"1\" source=\"seeds\" target=\"resolve\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"&gt;\n                        &lt;Array as=\"points\"&gt;\n                            &lt;mxPoint x=\"725\" y=\"130\"/&gt;\n                            &lt;mxPoint x=\"620\" y=\"130\"/&gt;\n                            &lt;mxPoint x=\"620\" y=\"191\"/&gt;\n                        &lt;/Array&gt;\n                    &lt;/mxGeometry&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"ordered\" value=\"&amp;lt;b&amp;gt;Ordered install&amp;lt;br&amp;gt;list&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;deps before&amp;lt;br&amp;gt;dependants&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"660\" y=\"245\" width=\"130\" height=\"70\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e4\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;entryX=0.5;entryY=0;entryDx=0;entryDy=0;\" parent=\"1\" source=\"resolve\" target=\"ordered\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"download\" value=\"&amp;lt;b&amp;gt;Parallel&amp;lt;br&amp;gt;download&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;cache check \u2192&amp;lt;br&amp;gt;fetch misses \u2192&amp;lt;br&amp;gt;verify checksum&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"430\" y=\"300\" width=\"150\" height=\"80\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e5\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;exitX=0.5;exitY=1;exitDx=0;exitDy=0;\" parent=\"1\" source=\"ordered\" target=\"download\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"cache\" value=\"&amp;lt;b&amp;gt;Local cache&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;~/.cache/flatroot/&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"230\" y=\"315\" width=\"130\" height=\"50\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e5b\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#999999;dashed=1;\" parent=\"1\" source=\"cache\" target=\"download\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"extract\" value=\"&amp;lt;b&amp;gt;Extract&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;unpack archives&amp;lt;br&amp;gt;in resolver order&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"30\" y=\"440\" width=\"130\" height=\"60\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e6\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;exitX=0;exitY=1;exitDx=0;exitDy=0;\" parent=\"1\" source=\"download\" target=\"extract\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"&gt;\n                        &lt;Array as=\"points\"&gt;\n                            &lt;mxPoint x=\"95\" y=\"385\"/&gt;\n                        &lt;/Array&gt;\n                    &lt;/mxGeometry&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"scripts\" value=\"&amp;lt;b&amp;gt;Post-install&amp;lt;br&amp;gt;scripts&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;stubs + namespace&amp;lt;br&amp;gt;sandbox&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"230\" y=\"440\" width=\"130\" height=\"60\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e7\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;\" parent=\"1\" source=\"extract\" target=\"scripts\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"hooks\" value=\"&amp;lt;b&amp;gt;Cache&amp;lt;br&amp;gt;hooks&amp;lt;/b&amp;gt;&amp;lt;br&amp;gt;&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;ldconfig, fonts,&amp;lt;br&amp;gt;icons, mime&amp;lt;/font&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"430\" y=\"440\" width=\"130\" height=\"60\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e8\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;\" parent=\"1\" source=\"scripts\" target=\"hooks\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"rootfs\" value=\"&amp;lt;b&amp;gt;Functional&amp;lt;br&amp;gt;rootfs&amp;lt;/b&amp;gt;\" style=\"rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"640\" y=\"440\" width=\"150\" height=\"60\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"e9\" style=\"edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;\" parent=\"1\" source=\"hooks\" target=\"rootfs\" edge=\"1\"&gt;\n                    &lt;mxGeometry relative=\"1\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"leg1\" value=\"&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;blue = core pipeline&amp;lt;/font&amp;gt;\" style=\"text;html=1;fontSize=10;fillColor=none;strokeColor=none;fontColor=#6c8ebf;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"870\" y=\"60\" width=\"120\" height=\"20\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"leg2\" value=\"&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;purple = post-install&amp;lt;/font&amp;gt;\" style=\"text;html=1;fontSize=10;fillColor=none;strokeColor=none;fontColor=#9673a6;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"870\" y=\"80\" width=\"120\" height=\"20\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"leg3\" value=\"&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;green = output&amp;lt;/font&amp;gt;\" style=\"text;html=1;fontSize=10;fillColor=none;strokeColor=none;fontColor=#82b366;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"870\" y=\"100\" width=\"120\" height=\"20\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n                &lt;mxCell id=\"leg4\" value=\"&amp;lt;font size=&amp;quot;1&amp;quot;&amp;gt;grey = external input&amp;lt;/font&amp;gt;\" style=\"text;html=1;fontSize=10;fillColor=none;strokeColor=none;fontColor=#999999;\" parent=\"1\" vertex=\"1\"&gt;\n                    &lt;mxGeometry x=\"870\" y=\"120\" width=\"120\" height=\"20\" as=\"geometry\"/&gt;\n                &lt;/mxCell&gt;\n            &lt;/root&gt;\n        &lt;/mxGraphModel&gt;\n    &lt;/diagram&gt;\n&lt;/mxfile&gt;"}' style="max-width:100%;border:1px solid transparent;"></div></p>
+<p>Blue boxes are core pipeline stages. Purple boxes are post-install passes. Green is the output. Grey boxes are external inputs — the distribution mirror, the seed list assembled from user packages plus base and essential packages, and the local download cache.</p>
+<h2 id="related-pages">Related pages</h2>
+<ul>
+<li>Architecture / Spec / <strong><a href="spec/">Specification</a></strong> — This section is the behavioural specification of FlatRoot: one page per use case, each recording what the tool promises for that request and how the promise travels through...<br/><span class="md-tag md-tag--matched">architecture</span> <span class="md-tag">spec</span></li>
+<li>Architecture / Spec / <strong><a href="spec/export/">Exporting a Rootfs</a></strong> — A user names a finished rootfs and a destination and receives one compressed archive any ordinary tool can unpack — reproducible, faithful to symlinks, and free of the...<br/><span class="md-tag md-tag--matched">architecture</span> <span class="md-tag">spec</span> <span class="md-tag">export</span></li>
+<li>Architecture / Spec / <strong><a href="spec/install/">Installing Packages</a></strong> — A user names a distribution, a release, a destination directory, and the packages they care about, and receives a complete root filesystem: the requested packages, everything...<br/><span class="md-tag md-tag--matched">architecture</span> <span class="md-tag">spec</span> <span class="md-tag">install</span></li>
+</ul>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.code.select", "content.code.annotate", "content.tooltips"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+<script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+<script src="../assets/javascripts/panzoom.min.js"></script>
+<script src="../assets/javascripts/zoompan.js"></script>
+<script src="https://viewer.diagrams.net/js/viewer-static.min.js"></script></body>
+</html>
